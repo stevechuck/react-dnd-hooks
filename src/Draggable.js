@@ -56,7 +56,9 @@ const Draggable = ({children, id, onDrag, onDragEnd}) => {
     zIndex: state.isDragging ? 2 : 1,
     position: state.isDragging ? 'absolute' : 'relative'
   }), [state.isDragging, state.translation]);
-	
+
+  // console.log(children);
+
   return (
     <div style={styles} onMouseDown={handleMouseDown}>
       {children}

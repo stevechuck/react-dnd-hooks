@@ -1,68 +1,70 @@
 import React, {useState, useCallback} from 'react';
 import styled from 'styled-components';
 import Draggable from './Draggable';
+import DroppableManager from './DroppableManager';
 
 const HEIGHT = 80;
 
 const App = () => {
-  const items = [11, 22, 33, 44, 55];
-  const [state, setState] = useState({
-    order: items,
-    dragOrder: items, // items order while dragging
-    draggedIndex: null
-  });
+  // const items = [11, 22, 33, 44, 55];
+  // const [state, setState] = useState({
+  //   order: items,
+  //   dragOrder: items, // items order while dragging
+  //   draggedIndex: null
+  // });
 	
-  const handleDrag = useCallback(({translation, id}) => {
-    const delta = Math.round(translation.y / HEIGHT);  // delta = [-1, 1]
-    const index = state.order.indexOf(id);
-    const dragOrder = state.order.filter(index => index !== id);
+  // const handleDrag = useCallback(({translation, id}) => {
+  //   const delta = Math.round(translation.y / HEIGHT);  // delta = [-1, 1]
+  //   const index = state.order.indexOf(id);
+  //   const dragOrder = state.order.filter(index => index !== id);
 		
-    // make sure in range
-    if ((index + delta) < 0 || (index + delta) >= items.length) {
-      return;
-    }
+  //   // make sure in range
+  //   if ((index + delta) < 0 || (index + delta) >= items.length) {
+  //     return;
+  //   }
 		
-    dragOrder.splice(index + delta, 0, id);
+  //   dragOrder.splice(index + delta, 0, id);
 		
-    setState(state => ({
-      ...state,
-      draggedIndex: id,
-      dragOrder
-    }));
-  }, [state.order, items.length]);
+  //   setState(state => ({
+  //     ...state,
+  //     draggedIndex: id,
+  //     dragOrder
+  //   }));
+  // }, [state.order, items.length]);
 	
-  const handleDragEnd = useCallback(() => {
-    setState(state => ({
-      ...state,
-      order: state.dragOrder,
-      draggedIndex: null
-    }));
-  }, []);
+  // const handleDragEnd = useCallback(() => {
+  //   setState(state => ({
+  //     ...state,
+  //     order: state.dragOrder,
+  //     draggedIndex: null
+  //   }));
+  // }, []);
 	
   return (
-    <Container>
-      {items.map(index => {
-        const isDragging = state.draggedIndex === index;
-        const top = state.dragOrder.indexOf(index) * (HEIGHT + 10);
-        const draggedTop = state.order.indexOf(index) * (HEIGHT + 10);
+    <DroppableManager/>
+    // <Container>
+    //   {items.map(index => {
+    //     const isDragging = state.draggedIndex === index;
+    //     const top = state.dragOrder.indexOf(index) * (HEIGHT + 10);
+    //     const draggedTop = state.order.indexOf(index) * (HEIGHT + 10);
 				
-        return (
-          <Draggable
-            key={index}
-            id={index}
-            onDrag={handleDrag}
-            onDragEnd={handleDragEnd}
-          >
-            <Rect
-              isDragging={isDragging}
-              top={isDragging ? draggedTop : top}
-            >
-             {index}
-            </Rect>
-          </Draggable>
-        );
-      })}
-    </Container>
+    //     return (
+    //       <Draggable
+    //         key={index}
+    //         id={index}
+    //         onDrag={handleDrag}
+    //         onDragEnd={handleDragEnd}
+    //       >
+    //         <Rect
+    //           isDragging={isDragging}
+    //           top={isDragging ? draggedTop : top}
+    //         >
+    //          {index}
+    //         </Rect>
+    //       </Draggable>
+    //     );
+    //   })}
+    // </Container>
   );
 };
 
