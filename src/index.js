@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 import DragItem from "./components/drag-item";
 import DropItem from "./components/drop-item";
@@ -12,7 +12,7 @@ const todos = {
   },
   2: {
     text: "Second thing",
-    state: "todo"
+    state: "wip"
   },
   3: {
     text: "Third thing",
@@ -24,49 +24,120 @@ const todos = {
   }
 };
 
+const lists = {
+  todo: ["1", "3", "4"],
+  wip: ["2"],
+  done: []
+};
+
 function App() {
   const [todoValues, setValue] = useState(todos);
+  const [list, setLists] = useState(lists);
+  const [currentDraggedId, setCurrentDraggedId] = useState(null);
+  const currentDraggedIdRef = React.useRef();
+
+  useEffect(() => {
+    currentDraggedIdRef.current = currentDraggedId;
+  }, [currentDraggedId]);
+
+  const onDragStart = useCallback((draggedId) => {
+    setCurrentDraggedId(draggedId);
+  }, [currentDraggedId])
+
+  const onDragOver = (id, index) => {
+    const parentListId = todoValues[id].state;
+    const draggedOverItem = list[parentListId][index];
+    const draggedItem = currentDraggedIdRef.current;
+    // if the item is dragged over itself, ignore
+    if (draggedItem === draggedOverItem) {
+      return;
+    }
+
+    // filter out the currently dragged item
+    let items = list[parentListId].filter(item => item != parseInt(draggedItem));
+    
+    // add the dragged item after the dragged over item
+    items.splice(index, 0, draggedItem);
+    console.log(items);
+    setLists(lists => ({
+      ...lists,
+      [parentListId]: items
+    }));
+  }
+
   return (
     <div className="App">
       <div className="box">
         <DropItem
           heading="Todos"
-          onDrop={id => {
+          onDrop={(id) => {
             const currentTodo = { ...todoValues[id] };
+            const previousState = currentTodo.state;
+            if (previousState == "todo") return;
+            let previousList = list[currentTodo.state];
+            const indexInList = previousList.indexOf(id);
+            if (indexInList > -1) {
+              previousList.splice(indexInList, 1);
+            }
             currentTodo.state = "todo";
-            setValue({ ...todoValues, ...{ [id]: currentTodo } });
+            const currentList = list[currentTodo.state];
+            currentList.push(id);
+            setLists({ ...list, [previousState]: previousList, [currentTodo.state]: currentList} );
+            setValue({ ...todoValues, ...{ [id]: currentTodo }});
+            setCurrentDraggedId(null);
           }}
         >
-          {Object.keys(todoValues)
-            .map(key => ({ id: key, ...todoValues[key] }))
-            .filter(todo => todo.state === "todo")
-            .map(todo => <DragItem id={todo.id} data={todo} key={todo.id} />)}
+          {list.todo.map((id, i) => {
+            return <DragItem id={id} data={todoValues[id]} key={id} index={i} 
+              onDragStart={(draggedId) => onDragStart(draggedId)}
+              onDragOver={() => onDragOver(id, i)}/>
+          })}
         </DropItem>
         <DropItem
           heading="WIP"
-          onDrop={id => {
+          onDrop={(id) => {
             const currentTodo = { ...todoValues[id] };
+            let previousState = currentTodo.state;
+            let previousList = list[currentTodo.state];
+            if (previousState == "wip") return;
+            let indexInList = previousList.indexOf(id);
+            if (indexInList > -1) {
+              previousList.splice(indexInList, 1);
+            }
             currentTodo.state = "wip";
-            setValue({ ...todoValues, ...{ [id]: currentTodo } });
+            const currentList = list[currentTodo.state];
+            currentList.push(id);
+            setLists({ ...list, [previousState]: previousList, [currentTodo.state]: currentList} );
+            setValue({ ...todoValues, ...{ [id]: currentTodo }});
+            setCurrentDraggedId(null);
           }}
         >
-          {Object.keys(todoValues)
-            .map(key => ({ id: key, ...todoValues[key] }))
-            .filter(todo => todo.state === "wip")
-            .map(todo => <DragItem id={todo.id} data={todo} key={todo.id} />)}
+          {list.wip.map((id, i) => {
+            return <DragItem id={id} data={todoValues[id]} key={id} index={i}/>
+          })}
         </DropItem>
         <DropItem
           heading="Done"
-          onDrop={id => {
+          onDrop={(id) => {
             const currentTodo = { ...todoValues[id] };
+            let previousState = currentTodo.state;
+            if (previousState == "done") return;
+            let previousList = list[currentTodo.state];
+            let indexInList = previousList.indexOf(id);
+            if (indexInList > -1) {
+              previousList.splice(indexInList, 1);
+            }
             currentTodo.state = "done";
-            setValue({ ...todoValues, ...{ [id]: currentTodo } });
+            const currentList = list[currentTodo.state];
+            currentList.push(id);
+            setLists({ ...list, [previousState]: previousList, [currentTodo.state]: currentList} );
+            setValue({ ...todoValues, ...{ [id]: currentTodo }});
+            setCurrentDraggedId(null);
           }}
         >
-          {Object.keys(todoValues)
-            .map(key => ({ id: key, ...todoValues[key] }))
-            .filter(todo => todo.state === "done")
-            .map(todo => <DragItem id={todo.id} data={todo} key={todo.id} />)}
+          {list.done.map((id, i) => {
+            return <DragItem id={id} data={todoValues[id]} key={id} index={i}/>
+          })}
         </DropItem>
       </div>
     </div>
@@ -75,3 +146,8 @@ function App() {
 
 const rootElement = document.getElementById("root");
 ReactDOM.render(<App />, rootElement);
+
+// {/* {Object.keys(todoValues)
+//             .map(key => ({ id: key, ...todoValues[key] }))
+//             .filter(todo => todo.state === "todo")
+//             .map(todo => <DragItem id={todo.id} data={todo} key={todo.id} />)} */}
