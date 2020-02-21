@@ -12,7 +12,7 @@ const todos = {
   },
   2: {
     text: "Second thing",
-    state: "wip"
+    state: "todo"
   },
   3: {
     text: "Third thing",
@@ -25,8 +25,8 @@ const todos = {
 };
 
 const lists = {
-  todo: ["1", "3", "4"],
-  wip: ["2"],
+  todo: ["1","2", "3", "4"],
+  wip: [],
   done: []
 };
 
@@ -44,24 +44,27 @@ function App() {
     setCurrentDraggedId(draggedId);
   }, [currentDraggedId])
 
-  const onDragOver = (id, index) => {
-    const parentListId = todoValues[id].state;
-    const draggedOverItem = list[parentListId][index];
-    const draggedItem = currentDraggedIdRef.current;
+  const onDragOver = (id) => {
+    const draggedOverItemParentListId = todoValues[id].state;
+    const draggedOverItemIndex = list[draggedOverItemParentListId].indexOf(id)
+    console.log(list[draggedOverItemParentListId]);
+
+    const draggedItemId = currentDraggedIdRef.current;
+
     // if the item is dragged over itself, ignore
-    if (draggedItem === draggedOverItem) {
+    if (draggedItemId == id) {
       return;
     }
-
     // filter out the currently dragged item
-    let items = list[parentListId].filter(item => item != parseInt(draggedItem));
+    let items = list[draggedOverItemParentListId].filter(item => item != draggedItemId);
+    // console.log(items);
     
     // add the dragged item after the dragged over item
-    items.splice(index, 0, draggedItem);
-    console.log(items);
+    items.splice(draggedOverItemIndex, 0, draggedItemId);
+    // console.log(items);
     setLists(lists => ({
       ...lists,
-      [parentListId]: items
+      [draggedOverItemParentListId]: items
     }));
   }
 
@@ -89,8 +92,8 @@ function App() {
         >
           {list.todo.map((id, i) => {
             return <DragItem id={id} data={todoValues[id]} key={id} index={i} 
-              onDragStart={(draggedId) => onDragStart(draggedId)}
-              onDragOver={() => onDragOver(id, i)}/>
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}/>
           })}
         </DropItem>
         <DropItem

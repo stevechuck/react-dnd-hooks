@@ -9,9 +9,9 @@ const useDrag = ({ id, effect, ref, onDragStart, onDragOver, onDragEnd }) => {
     
     onDragStart && onDragStart(id);
   };
+
   const dragOverCb = ev => {
     updateDragState("dragging");
-
     onDragOver && onDragOver();
   };
 

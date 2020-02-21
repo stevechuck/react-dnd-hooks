@@ -14,7 +14,7 @@ export default ({ dragEffect, data, key, id, onDragStart, onDragOver }) => {
       onDragStart(id);
       setClassValue("grabbing");
     },
-    onDragOver: () => onDragOver(),
+    onDragOver: () => onDragOver(id),
     onDragEnd: () => {
       setClassValue("grab");
     }
