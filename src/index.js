@@ -36,21 +36,23 @@ function App() {
   const [currentDraggedId, setCurrentDraggedId] = useState(null);
   const currentDraggedIdRef = React.useRef();
   const listRef = React.useRef();
+  const todoValuesRef = React.useRef();
 
   useEffect(() => {
     currentDraggedIdRef.current = currentDraggedId;
     listRef.current = list;
-  }, [currentDraggedId, list]);
+    todoValuesRef.current = todoValues;
+  }, [currentDraggedId, list, todoValues]);
 
   const onDragStart = (draggedId) => {
     setCurrentDraggedId(draggedId);
   }
 
-  const onDragOver = useCallback((id) => {
-    const draggedOverItemParentListId = todoValues[id].state;
+  const onDragOver = (id) => {
+    console.log("OVER")
+    
+    const draggedOverItemParentListId = todoValuesRef.current[id].state;
     const draggedOverItemIndex = listRef.current[draggedOverItemParentListId].indexOf(id)
-    console.log(listRef.current[draggedOverItemParentListId]);
-
     const draggedItemId = currentDraggedIdRef.current;
 
     // if the item is dragged over itself, ignore
@@ -59,16 +61,16 @@ function App() {
     }
     // filter out the currently dragged item
     let items = listRef.current[draggedOverItemParentListId].filter(item => item != draggedItemId);
-    // console.log(items);
     
     // add the dragged item after the dragged over item
     items.splice(draggedOverItemIndex, 0, draggedItemId);
-    // console.log(items);
     setLists(lists => ({
       ...lists,
       [draggedOverItemParentListId]: items
     }));
-  }, [list, currentDraggedIdRef]);
+  };
+
+  console.log(todoValues);
 
   return (
     <div className="App">
@@ -90,12 +92,14 @@ function App() {
             setLists({ ...list, [previousState]: previousList, [currentTodo.state]: currentList} );
             setValue({ ...todoValues, ...{ [id]: currentTodo }});
             setCurrentDraggedId(null);
+            console.log("DROPPED")
           }}
         >
           {list.todo.map((id, i) => {
             return <DragItem id={id} data={todoValues[id]} key={id} index={i} 
               onDragStart={onDragStart}
-              onDragOver={onDragOver}/>
+              onDragOver={onDragOver}
+            />
           })}
         </DropItem>
         <DropItem
@@ -115,11 +119,16 @@ function App() {
             setLists({ ...list, [previousState]: previousList, [currentTodo.state]: currentList} );
             setValue({ ...todoValues, ...{ [id]: currentTodo }});
             setCurrentDraggedId(null);
+            console.log("DROPPED")
           }}
         >
           {list.wip.map((id, i) => {
-            return <DragItem id={id} data={todoValues[id]} key={id} index={i}/>
+            return <DragItem id={id} data={todoValues[id]} key={id} index={i} 
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              />
           })}
+          
         </DropItem>
         <DropItem
           heading="Done"
