@@ -49,14 +49,15 @@ function App() {
   }
 
   const onDragOver = (id) => {
-    console.log("OVER")
-    
     const draggedOverItemParentListId = todoValuesRef.current[id].state;
     const draggedOverItemIndex = listRef.current[draggedOverItemParentListId].indexOf(id)
-    const draggedItemId = currentDraggedIdRef.current;
+
+    const draggedItemId = currentDraggedIdRef.current;    
+    const draggedItemParentListId = todoValuesRef.current[draggedItemId].state;
+
 
     // if the item is dragged over itself, ignore
-    if (draggedItemId == id) {
+    if (draggedItemId == id || draggedItemParentListId != draggedOverItemParentListId) {
       return;
     }
     // filter out the currently dragged item
@@ -69,8 +70,6 @@ function App() {
       [draggedOverItemParentListId]: items
     }));
   };
-
-  console.log(todoValues);
 
   return (
     <div className="App">
@@ -92,7 +91,6 @@ function App() {
             setLists({ ...list, [previousState]: previousList, [currentTodo.state]: currentList} );
             setValue({ ...todoValues, ...{ [id]: currentTodo }});
             setCurrentDraggedId(null);
-            console.log("DROPPED")
           }}
         >
           {list.todo.map((id, i) => {
