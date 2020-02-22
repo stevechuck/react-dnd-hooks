@@ -1,23 +1,29 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import "../../index.css";
 import useDrag from "../../hooks/useDrag";
 import View from "./view";
 
-export default ({ dragEffect, data, key, id, onDragStart, onDragOver }) => {
+export default ({ dragEffect, data, id, onDragStart, onDragOver }) => {
   const dragRef = useRef();
   const [classValue, setClassValue] = useState("grab");
   const { dragState } = useDrag({
     id,
     effect: dragEffect,
     ref: dragRef,
-    onDragStart: () => {
+    onDragStart: (ev) => {
       onDragStart(id);
-      setClassValue("grabbing");
+      window.requestAnimationFrame(() => { ev.target.style.visibility = "hidden"; });
     },
     onDragOver: () => onDragOver(id),
-    onDragEnd: () => {
-      setClassValue("grab");
+    onDragEnd: (ev) => {
+      window.requestAnimationFrame(() => { ev.target.style.visibility = "visible"; });
     }
   });
-  return <View ref={dragRef} key={key} data={data} classValue={classValue} />;
+
+  const styles = useMemo(() => ({
+    cursor: dragState == "dragging" ? '-webkit-grabbing' : '-webkit-grab',
+    zIndex: dragState == "dragging" ? 2 : 1,
+  }), [dragState]);
+
+  return <View ref={dragRef} data={data} styles={styles} classValue={classValue} />;
 };

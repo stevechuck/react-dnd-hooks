@@ -83,20 +83,13 @@ function App() {
   return (
     <div className="App">
       <div className="box">
-          <DropItem
-          onDrop={(id) => {onDrop("todo", id)}}
-        >
+        <DropItem heading="Todo" onDrop={(id) => {onDrop("todo", id)}}>
         { renderDragItems(list["todo"], todoValues, onDragStart, onDragOver) }
         </DropItem>
-        <DropItem
-          onDrop={(id) => {onDrop("wip", id)}}
-        >
+        <DropItem heading="WIP" onDrop={(id) => {onDrop("wip", id)}} >
           { renderDragItems(list["wip"], todoValues, onDragStart, onDragOver) }
         </DropItem>
-        <DropItem
-          heading="Done"
-          onDrop={(id) => {onDrop("done", id)}}
-        >
+        <DropItem heading="Done" onDrop={(id) => {onDrop("done", id)}} >
           { renderDragItems(list["done"], todoValues, onDragStart, onDragOver) }
         </DropItem>
       </div>

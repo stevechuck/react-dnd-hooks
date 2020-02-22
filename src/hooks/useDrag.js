@@ -3,16 +3,16 @@ import { useState, useCallback, useEffect, useRef } from "react";
 const useDrag = ({ id, effect, ref, onDragStart, onDragOver, onDragEnd }) => {
   const [dragState, updateDragState] = useState("draggable");
   const dragStartCb = ev => {
-    updateDragState("dragStart");
+    updateDragState("dragging");
     ev.dataTransfer.dropEffect = effect;
     ev.dataTransfer.setData("source", id);
     
-    onDragStart && onDragStart(id);
+    onDragStart && onDragStart(ev);
   };
 
   const dragOverCb = ev => {
-    updateDragState("dragging");
-    onDragOver && onDragOver();
+    // updateDragState("draggedOver");
+    onDragOver && onDragOver(ev);
   };
 
   const dragEndCb = ev => {
@@ -20,7 +20,7 @@ const useDrag = ({ id, effect, ref, onDragStart, onDragOver, onDragEnd }) => {
     if (effect === "move") {
       updateDragState("moved");
     }
-    onDragEnd && onDragEnd();
+    onDragEnd && onDragEnd(ev);
   };
   useEffect(() => {
     const elem = ref.current;
