@@ -36,37 +36,26 @@ function App() {
   const [todoValues, setValue] = useState(todos);
   const [list, setLists] = useState(lists);
   const [currentDraggedId, setCurrentDraggedId] = useState(null);
-  const currentDraggedIdRef = React.useRef();
-  const listRef = React.useRef();
-  const todoValuesRef = React.useRef();
-
-  useEffect(() => {
-    currentDraggedIdRef.current = currentDraggedId;
-    listRef.current = list;
-    todoValuesRef.current = todoValues;
-  }, [currentDraggedId, list, todoValues]);
 
   const onDragStart = (draggedId) => {
     setCurrentDraggedId(draggedId);
   }
 
   const onDragOver = (id) => {
-    const draggedOverItemParentListId = todoValuesRef.current[id].state;
-    const draggedOverItemIndex = listRef.current[draggedOverItemParentListId].indexOf(id)
+    const draggedOverItemParentListId = todoValues[id].state;
+    const draggedOverItemIndex = list[draggedOverItemParentListId].indexOf(id);
 
-    const draggedItemId = currentDraggedIdRef.current;    
-    const draggedItemParentListId = todoValuesRef.current[draggedItemId].state;
-
+    const draggedItemParentListId = todoValues[currentDraggedId].state;
 
     // if the item is dragged over itself, ignore
-    if (draggedItemId == id || draggedItemParentListId != draggedOverItemParentListId) {
+    if (currentDraggedId == id || draggedItemParentListId != draggedOverItemParentListId) {
       return;
     }
     // filter out the currently dragged item
-    let items = listRef.current[draggedOverItemParentListId].filter(item => item != draggedItemId);
+    let items = list[draggedOverItemParentListId].filter(item => item != currentDraggedId);
     
     // add the dragged item after the dragged over item
-    items.splice(draggedOverItemIndex, 0, draggedItemId);
+    items.splice(draggedOverItemIndex, 0, currentDraggedId);
     setLists(lists => ({
       ...lists,
       [draggedOverItemParentListId]: items

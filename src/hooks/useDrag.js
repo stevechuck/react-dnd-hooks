@@ -35,7 +35,7 @@ const useDrag = ({ id, effect, ref, onDragStart, onDragOver, onDragEnd }) => {
         elem.removeEventListener("dragend", dragEndCb);
       };
     }
-  }, []);
+  }, [onDragStart, onDragOver, onDragEnd]);
   return {
     dragState: dragState
   };
