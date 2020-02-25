@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from "react";
 import ReactDOM from "react-dom";
 import DragItem from "./components/drag-item";
 import DropItem from "./components/drop-item";
+import { TreeNode } from "./components/tree-node/TreeNode"
+import { Global } from './components/tree-node/styles'
 
 import "./index.css";
 
@@ -93,6 +95,28 @@ function App() {
           { renderDragItems(list["done"], todoValues, onDragStart, onDragOver) }
         </DropItem>
       </div>
+      <Global />
+      <div style={{ "textAlign": "left"}}>
+        <TreeNode name="main" defaultOpen>
+          <TreeNode name="hello" />
+          <TreeNode name="subtree with children">
+            <TreeNode name="hello" />
+            <TreeNode name="sub-subtree with children">
+              <TreeNode name="child 1" style={{ color: '#37ceff' }} />
+              <TreeNode name="child 2" style={{ color: '#37ceff' }} />
+              <TreeNode name="child 3" style={{ color: '#37ceff' }} />
+              <TreeNode name="custom content">
+                <div style={{ position: 'relative', width: '100%', height: 200, padding: 10 }}>
+                  <div style={{ width: '100%', height: '100%', background: 'black', borderRadius: 5 }} />
+                </div>
+              </TreeNode>
+            </TreeNode>
+            <TreeNode name="hello" />
+          </TreeNode>
+          <TreeNode name="world" />
+          <TreeNode name={<span>🙀 something something</span>} />
+        </TreeNode>
+      </div>      
     </div>
   );
 }
