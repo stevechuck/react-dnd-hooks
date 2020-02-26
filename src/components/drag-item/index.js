@@ -23,6 +23,7 @@ export default ({ dragEffect, data, id, onDragStart, onDragOver }) => {
   const styles = useMemo(() => ({
     cursor: dragState == "dragging" ? '-webkit-grabbing' : '-webkit-grab',
     zIndex: dragState == "dragging" ? 2 : 1,
+    transition: "transform 1s"
   }), [dragState]);
 
   return <View ref={dragRef} data={data} styles={styles} classValue={classValue} />;

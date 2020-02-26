@@ -64,39 +64,66 @@ function App() {
     }));
   };
 
-  const onDrop = (listId, droppedItemId) => {
-    const currentTodo = { ...todoValues[droppedItemId] };
-    const previousState = currentTodo.state;
-    if (previousState == listId) return;
+  // const onDrop = (listId, droppedItemId) => {
+  //   const currentTodo = { ...todoValues[droppedItemId] };
+  //   const previousState = currentTodo.state;
+  //   if (previousState == listId) return;
 
-    let previousList = list[currentTodo.state];
-    const indexInList = previousList.indexOf(droppedItemId);
+  //   let previousList = list[currentTodo.state];
+  //   const indexInList = previousList.indexOf(droppedItemId);
+  //   if (indexInList > -1) {
+  //     previousList.splice(indexInList, 1);
+  //   }
+  //   currentTodo.state = listId;
+  //   const currentList = list[currentTodo.state];
+  //   currentList.push(droppedItemId);
+  //   setLists({ ...list, [previousState]: previousList, [currentTodo.state]: currentList} );
+  //   setValue({ ...todoValues, ...{ [droppedItemId]: currentTodo }});
+  //   setCurrentDraggedId(null);
+  // }
+
+  const onDroppableDragOver = useCallback((listId) => {
+    const currentDraggedItem = { ...todoValues[currentDraggedId] };
+    const previousState = currentDraggedItem.state; 
+    // console.log(previousState == listId);
+    if (previousState == listId) return;
+    console.log(todoValues);
+    console.log(list);
+
+    let previousList = list[currentDraggedItem.state];
+    const indexInList = previousList.indexOf(currentDraggedId);
     if (indexInList > -1) {
       previousList.splice(indexInList, 1);
     }
-    currentTodo.state = listId;
-    const currentList = list[currentTodo.state];
-    currentList.push(droppedItemId);
-    setLists({ ...list, [previousState]: previousList, [currentTodo.state]: currentList} );
-    setValue({ ...todoValues, ...{ [droppedItemId]: currentTodo }});
+    currentDraggedItem.state = listId;
+    const currentList = list[currentDraggedItem.state];
+    currentList.push(currentDraggedId);
+    // setValue({ ...todoValues, [currentDraggedId]: currentDraggedItem });
+    setValue({ ...todoValues, [currentDraggedId]: currentDraggedItem });
+    setLists({ ...list, [previousState]: previousList, [currentDraggedItem.state]: currentList} );
+  }, [todoValues, list, currentDraggedId])
+
+  const onDrop = () => {
+    setValue({ ...todoValues});
     setCurrentDraggedId(null);
   }
+   console.log(todoValues);    
 
   return (
     <div className="App">
       <div className="box">
-        <DropItem heading="Todo" onDrop={(id) => {onDrop("todo", id)}}>
+        <DropItem heading="Todo" onDragOver={() => {onDroppableDragOver("todo")}} onDrop={onDrop}>
         { renderDragItems(list["todo"], todoValues, onDragStart, onDragOver) }
         </DropItem>
-        <DropItem heading="WIP" onDrop={(id) => {onDrop("wip", id)}} >
+        <DropItem heading="WIP" onDragOver={() => {onDroppableDragOver("wip")}} onDrop={onDrop}>
           { renderDragItems(list["wip"], todoValues, onDragStart, onDragOver) }
         </DropItem>
-        <DropItem heading="Done" onDrop={(id) => {onDrop("done", id)}} >
+        <DropItem heading="Done" onDragOver={() => {onDroppableDragOver("done")}} onDrop={onDrop}>
           { renderDragItems(list["done"], todoValues, onDragStart, onDragOver) }
         </DropItem>
       </div>
       <Global />
-      <div style={{ "textAlign": "left"}}>
+      <div style={{ "textAlign": "left", "marginTop":"2em"}}>
         <TreeNode name="main" defaultOpen>
           <TreeNode name="hello" />
           <TreeNode name="subtree with children">
