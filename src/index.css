@@ -15,7 +15,7 @@ code {
 .App {
   font-family: sans-serif;
   text-align: center;
-  padding: 10em;
+  overflow-y: scroll;
 }
 
 .elem {

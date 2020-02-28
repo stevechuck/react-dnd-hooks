@@ -4,6 +4,7 @@ import DragItem from "./components/drag-item";
 import DropItem from "./components/drop-item";
 import { TreeNode } from "./components/tree-node/TreeNode"
 import { Global } from './components/tree-node/styles'
+import { DraggableList } from './components/spring-draggable-list/DraggableList'
 
 import "./index.css";
 
@@ -64,24 +65,6 @@ function App() {
     }));
   };
 
-  // const onDrop = (listId, droppedItemId) => {
-  //   const currentTodo = { ...todoValues[droppedItemId] };
-  //   const previousState = currentTodo.state;
-  //   if (previousState == listId) return;
-
-  //   let previousList = list[currentTodo.state];
-  //   const indexInList = previousList.indexOf(droppedItemId);
-  //   if (indexInList > -1) {
-  //     previousList.splice(indexInList, 1);
-  //   }
-  //   currentTodo.state = listId;
-  //   const currentList = list[currentTodo.state];
-  //   currentList.push(droppedItemId);
-  //   setLists({ ...list, [previousState]: previousList, [currentTodo.state]: currentList} );
-  //   setValue({ ...todoValues, ...{ [droppedItemId]: currentTodo }});
-  //   setCurrentDraggedId(null);
-  // }
-
   const onDroppableDragOver = useCallback((listId) => {
     const currentDraggedItem = { ...todoValues[currentDraggedId] };
     const previousState = currentDraggedItem.state; 
@@ -122,8 +105,8 @@ function App() {
           { renderDragItems(list["done"], todoValues, onDragStart, onDragOver) }
         </DropItem>
       </div>
-      <Global />
       <div style={{ "textAlign": "left", "marginTop":"2em"}}>
+        <Global />
         <TreeNode name="main" defaultOpen>
           <TreeNode name="hello" />
           <TreeNode name="subtree with children">
@@ -144,6 +127,9 @@ function App() {
           <TreeNode name={<span>🙀 something something</span>} />
         </TreeNode>
       </div>      
+      <div style={{ "display": "flex", "justifyContent": "center", "marginTop":"2em"}}>
+        <DraggableList items={'Lorem ipsum dolor sit'.split(' ')} />
+      </div>
     </div>
   );
 }

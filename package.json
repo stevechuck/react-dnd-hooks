@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "lodash-es": "^4.17.15",
+    "lodash-move": "^1.1.1",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-spring": "^8.0.27",
+    "react-use-gesture": "5.0.0",
     "styled-components": "^5.0.1"
   },
   "scripts": {
