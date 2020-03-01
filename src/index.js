@@ -5,6 +5,7 @@ import DropItem from "./components/drop-item";
 import { TreeNode } from "./components/tree-node/TreeNode"
 import { Global } from './components/tree-node/styles'
 import { DraggableList } from './components/spring-draggable-list/DraggableList'
+import { MyDraggableList } from './components/my-draggable-list/MyDraggableList'
 
 import "./index.css";
 
@@ -127,9 +128,16 @@ function App() {
           <TreeNode name={<span>🙀 something something</span>} />
         </TreeNode>
       </div>      
-      <div style={{ "display": "flex", "justifyContent": "center", "marginTop":"2em"}}>
+      <div style={{border: "#fff 1px solid", width: "800px", zIndex: "5"}} onMouseOver={() => {console.log("HERE")}}>
+          <span>TEST</span>
+        </div>
+      <div style={{ "display": "flex", "justifyContent": "start", "marginTop":"2em"}}>
+        
         <DraggableList items={'Lorem ipsum dolor sit'.split(' ')} />
+        <MyDraggableList/>
       </div>
+
+      
     </div>
   );
 }
