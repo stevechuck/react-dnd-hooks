@@ -20,17 +20,17 @@ const todos = {
   },
   3: {
     text: "Third thing",
-    state: "todo"
+    state: "wip"
   },
   4: {
     text: "Fourth thing",
-    state: "todo"
+    state: "wip"
   }
 };
 
 const lists = {
-  todo: ["1","2", "3", "4"],
-  wip: [],
+  todo: ["1","2"],
+  wip: ["3", "4"],
   done: []
 };
 
@@ -71,8 +71,6 @@ function App() {
     const previousState = currentDraggedItem.state; 
     // console.log(previousState == listId);
     if (previousState == listId) return;
-    console.log(todoValues);
-    console.log(list);
 
     let previousList = list[currentDraggedItem.state];
     const indexInList = previousList.indexOf(currentDraggedId);
@@ -82,7 +80,6 @@ function App() {
     currentDraggedItem.state = listId;
     const currentList = list[currentDraggedItem.state];
     currentList.push(currentDraggedId);
-    // setValue({ ...todoValues, [currentDraggedId]: currentDraggedItem });
     setValue({ ...todoValues, [currentDraggedId]: currentDraggedItem });
     setLists({ ...list, [previousState]: previousList, [currentDraggedItem.state]: currentList} );
   }, [todoValues, list, currentDraggedId])
@@ -91,7 +88,30 @@ function App() {
     setValue({ ...todoValues});
     setCurrentDraggedId(null);
   }
-   console.log(todoValues);    
+  
+  const onSpringDragOver = (listId) => {
+    // console.log(list);
+    // console.log(todoValues);
+    const currentDraggedItem = { ...todoValues[currentDraggedId] };
+    const previousState = currentDraggedItem.state; 
+    // console.log(previousState == listId);
+    if (previousState == listId || currentDraggedId == null) return;
+
+    let previousList = list[currentDraggedItem.state];
+    const indexInList = previousList.indexOf(currentDraggedId);
+    if (indexInList > -1) {
+      previousList.splice(indexInList, 1);
+    }
+    currentDraggedItem.state = listId;
+    const currentList = list[currentDraggedItem.state];
+    currentList.push(currentDraggedId);
+    setValue({ ...todoValues, [currentDraggedId]: currentDraggedItem });
+    setLists({ ...list, [previousState]: previousList, [currentDraggedItem.state]: currentList} );
+  };
+
+  const onDragStateChanged = (draggedId) => {
+    setCurrentDraggedId(draggedId);
+  }
 
   return (
     <div className="App">
@@ -128,16 +148,15 @@ function App() {
           <TreeNode name={<span>🙀 something something</span>} />
         </TreeNode>
       </div>      
-      <div style={{border: "#fff 1px solid", width: "800px", zIndex: "5"}} onMouseOver={() => {console.log("HERE")}}>
+      {/* <div style={{border: "#fff 1px solid", width: "800px", zIndex: "5"}} onMouseOver={() => {console.log("HERE")}}>
           <span>TEST</span>
-        </div>
+      </div> */}
       <div style={{ "display": "flex", "justifyContent": "start", "marginTop":"2em"}}>
-        
-        <DraggableList items={'Lorem ipsum dolor sit'.split(' ')} />
-        <MyDraggableList/>
+        <DraggableList listId="todo" items={lists.todo} onDragEnter={onSpringDragOver} setDragItem={onDragStateChanged}/>
+        <div><span>  Divider  </span></div>
+        <DraggableList listId="wip" items={lists.wip} onDragEnter={onSpringDragOver} setDragItem={onDragStateChanged}/>
+        {/* <MyDraggableList/> */}
       </div>
-
-      
     </div>
   );
 }
