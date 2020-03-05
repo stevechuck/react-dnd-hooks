@@ -11,7 +11,7 @@ export default ({ dragEffect, data, id, onDragStart, onDragOver }) => {
     effect: dragEffect,
     ref: dragRef,
     onDragStart: (ev) => {
-      onDragStart(id);
+      onDragStart(id, ev);
       window.requestAnimationFrame(() => { ev.target.style.visibility = "hidden"; });
     },
     onDragOver: () => onDragOver(id),

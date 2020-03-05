@@ -10,7 +10,7 @@ import './styles.css'
 // Returns fitting styles for dragged/idle items
 const fn = (order, down, originalIndex, curIndex, x, y, isInsideContainer) => index =>
     down && index === originalIndex
-    ? { x: x, y: curIndex * 100 + y, scale: 1.1, zIndex: '-1', shadow: 15, immediate: n => n === 'y' || n === 'zIndex' }
+    ? { x: x, y: curIndex * 100 + y, scale: 1.1, zIndex: '2', shadow: 15, immediate: n => n === 'y' || n === 'zIndex' }
     : { x: 0, y: order.indexOf(index) * 100, scale: 1, zIndex: '1', shadow: 1, immediate: false }
 
 export function DraggableList({ listId, items, onDragEnter, setDragItem}) {
@@ -19,19 +19,10 @@ export function DraggableList({ listId, items, onDragEnter, setDragItem}) {
   const order = useRef(items.map((_, index) => index)) // Store indicies as a local ref, this represents the item order
   const [springs, setSprings] = useSprings(items.length, fn(order.current)) // Create springs, each corresponds to an item, controlling its transform, scale, etc.
 
-  useEffect(() => {
-    order.current = items.map((_, index) => index);
-    console.log(order.current);
-  });
-
-  console.log(items);
-
   const bind = useGesture(({ args: [originalIndex, itemId], down, delta: [x, y] }) => {
-
     const curIndex = order.current.indexOf(originalIndex)
     const curRow = clamp(Math.round((curIndex * 100 + y) / 100), 0, items.length - 1)
     const newOrder = swap(order.current, curIndex, curRow)
-
 
     setIsDragging(true);
     setDragItem(itemId);

@@ -5,7 +5,6 @@ const useDrop = ({ ref, onDrop, onDragOver }) => {
   const dropOverCb = ev => {
     ev.preventDefault();
     onDragOver();
-    console.log("HEREEEE");
     updateDropState("dragging over");
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
 import DragItem from "./components/drag-item";
 import DropItem from "./components/drop-item";
@@ -6,6 +6,8 @@ import { TreeNode } from "./components/tree-node/TreeNode"
 import { Global } from './components/tree-node/styles'
 import { DraggableList } from './components/spring-draggable-list/DraggableList'
 import { MyDraggableList } from './components/my-draggable-list/MyDraggableList'
+import { useGesture } from 'react-use-gesture'
+import { useTransition, animated, config } from 'react-spring'
 
 import "./index.css";
 
@@ -20,7 +22,7 @@ const todos = {
   },
   3: {
     text: "Third thing",
-    state: "wip"
+    state: "todo"
   },
   4: {
     text: "Fourth thing",
@@ -28,43 +30,81 @@ const todos = {
   }
 };
 
-const lists = {
-  todo: ["1","2"],
-  wip: ["3", "4"],
+const listData = {
+  todo: [{id: "1"}, {id: "2"}, {id: "3"}],
+  wip: [{id: "4"}],
   done: []
 };
 
+const springList = {
+  todo: ["1", "2", "3"],
+  wip: ["4"],
+  done: []
+};
 
+function renderDragItems(transition, todoValues, onDragStart, onDragOver) {
+  return transition.map(({ item, props: { y, ...rest }, key }, index) => (
+    <animated.div
+      key={key}
+      style={{
+        transform: y.interpolate(y => `translate3d(0,${y}px,0)`),
+        ...rest
+      }}
+    >
+    <DragItem id={item.id} data={todoValues[item.id]} key={item.id} index={index} 
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}/>
+    </animated.div>
+  ))
+}
 
 function App() {
   const [todoValues, setValue] = useState(todos);
-  const [list, setLists] = useState(lists);
+  const [list, setLists] = useState(listData);
   const [currentDraggedId, setCurrentDraggedId] = useState(null);
 
-  const onDragStart = (draggedId) => {
+  const height = 15;
+  let transitions = {};
+  for (let [listId, listVal] of Object.entries(list)) {
+    const transition = useTransition(
+      listVal.map((data, i) => ({ ...data, y: i * height })),
+      d => d.id,
+      {
+        config: { mass: 1, tension: 280, friction: 60, initialVelocity: 0 },
+        from: { opacity: 0 },
+        leave: { height: 0, opacity: 0 },
+        enter: ({ y }) => ({ y, opacity: 1 }),
+        update: ({ y }) => ({ y, opacity: 1 })
+      }
+    );
+    transitions[listId] = transition;
+  }
+
+  const onDragStart = (draggedId, ev) => {
     setCurrentDraggedId(draggedId);
+    console.log(ev);
   }
 
   const onDragOver = (id) => {
     const draggedOverItemParentListId = todoValues[id].state;
-    const draggedOverItemIndex = list[draggedOverItemParentListId].indexOf(id);
+    const draggedOverItemIndex = list[draggedOverItemParentListId].findIndex(item => item.id == id);
 
     const draggedItemParentListId = todoValues[currentDraggedId].state;
 
     // if the item is dragged over itself, ignore
     if (currentDraggedId == id || draggedItemParentListId != draggedOverItemParentListId) {
       return;
-    }
+    } 
     // filter out the currently dragged item
-    let items = list[draggedOverItemParentListId].filter(item => item != currentDraggedId);
-    
+    let items = list[draggedOverItemParentListId].filter(item => item.id != currentDraggedId);
     // add the dragged item after the dragged over item
-    items.splice(draggedOverItemIndex, 0, currentDraggedId);
+    items.splice(draggedOverItemIndex, 0, {id: currentDraggedId});
     setLists(lists => ({
       ...lists,
       [draggedOverItemParentListId]: items
     }));
   };
+
 
   const onDroppableDragOver = useCallback((listId) => {
     const currentDraggedItem = { ...todoValues[currentDraggedId] };
@@ -73,13 +113,13 @@ function App() {
     if (previousState == listId) return;
 
     let previousList = list[currentDraggedItem.state];
-    const indexInList = previousList.indexOf(currentDraggedId);
+    const indexInList = previousList.findIndex(item => item.id == currentDraggedId);
     if (indexInList > -1) {
       previousList.splice(indexInList, 1);
     }
     currentDraggedItem.state = listId;
     const currentList = list[currentDraggedItem.state];
-    currentList.push(currentDraggedId);
+    currentList.push({id: currentDraggedId});
     setValue({ ...todoValues, [currentDraggedId]: currentDraggedItem });
     setLists({ ...list, [previousState]: previousList, [currentDraggedItem.state]: currentList} );
   }, [todoValues, list, currentDraggedId])
@@ -109,21 +149,17 @@ function App() {
     setLists({ ...list, [previousState]: previousList, [currentDraggedItem.state]: currentList} );
   };
 
-  const onDragStateChanged = (draggedId) => {
-    setCurrentDraggedId(draggedId);
-  }
-
   return (
     <div className="App">
       <div className="box">
         <DropItem heading="Todo" onDragOver={() => {onDroppableDragOver("todo")}} onDrop={onDrop}>
-        { renderDragItems(list["todo"], todoValues, onDragStart, onDragOver) }
+          { renderDragItems(transitions["todo"], todoValues, onDragStart, onDragOver) }
         </DropItem>
         <DropItem heading="WIP" onDragOver={() => {onDroppableDragOver("wip")}} onDrop={onDrop}>
-          { renderDragItems(list["wip"], todoValues, onDragStart, onDragOver) }
+          { renderDragItems(transitions["wip"], todoValues, onDragStart, onDragOver) }
         </DropItem>
         <DropItem heading="Done" onDragOver={() => {onDroppableDragOver("done")}} onDrop={onDrop}>
-          { renderDragItems(list["done"], todoValues, onDragStart, onDragOver) }
+          { renderDragItems(transitions["done"], todoValues, onDragStart, onDragOver) }
         </DropItem>
       </div>
       <div style={{ "textAlign": "left", "marginTop":"2em"}}>
@@ -148,26 +184,13 @@ function App() {
           <TreeNode name={<span>🙀 something something</span>} />
         </TreeNode>
       </div>      
-      {/* <div style={{border: "#fff 1px solid", width: "800px", zIndex: "5"}} onMouseOver={() => {console.log("HERE")}}>
-          <span>TEST</span>
-      </div> */}
-      <div style={{ "display": "flex", "justifyContent": "start", "marginTop":"2em"}}>
-        <DraggableList listId="todo" items={lists.todo} onDragEnter={onSpringDragOver} setDragItem={onDragStateChanged}/>
+      {/* <div style={{ "display": "flex", "justifyContent": "start", "marginTop":"2em"}}>
+        <DraggableList listId="todo" items={springList.todo} onDragEnter={onSpringDragOver} setDragItem={onDragStateChanged}/>
         <div><span>  Divider  </span></div>
-        <DraggableList listId="wip" items={lists.wip} onDragEnter={onSpringDragOver} setDragItem={onDragStateChanged}/>
-        {/* <MyDraggableList/> */}
-      </div>
+        <DraggableList listId="wip" items={springList.wip} onDragEnter={onSpringDragOver} setDragItem={onDragStateChanged}/>
+      </div> */}
     </div>
   );
-}
-
-function renderDragItems(list, todoValues, onDragStart, onDragOver) {
-  return list.map((id, i) => {
-    return <DragItem id={id} data={todoValues[id]} key={id} index={i} 
-      onDragStart={onDragStart}
-      onDragOver={onDragOver}
-  />
-  });
 }
 
 const rootElement = document.getElementById("root");
