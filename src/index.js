@@ -48,6 +48,7 @@ function renderDragItems(transition, todoValues, onDragStart, onDragOver) {
       key={key}
       style={{
         transform: y.interpolate(y => `translate3d(0,${y}px,0)`),
+        zIndex: transition.length - index,
         ...rest
       }}
     >
@@ -61,8 +62,8 @@ function renderDragItems(transition, todoValues, onDragStart, onDragOver) {
 function App() {
   const [todoValues, setValue] = useState(todos);
   const [list, setLists] = useState(listData);
-  const [currentDraggedId, setCurrentDraggedId] = useState(null);
-
+  const [currentDraggedObject, setCurrentDraggedObject] = useState({id: null, ev: null});
+  
   const height = 15;
   let transitions = {};
   for (let [listId, listVal] of Object.entries(list)) {
@@ -70,7 +71,10 @@ function App() {
       listVal.map((data, i) => ({ ...data, y: i * height })),
       d => d.id,
       {
-        config: { mass: 1, tension: 280, friction: 60, initialVelocity: 0 },
+        // config: { mass: 1, tension: 120, friction: 14, initialVelocity: 100 },
+        config: {
+          duration: 1000,
+        },
         from: { opacity: 0 },
         leave: { height: 0, opacity: 0 },
         enter: ({ y }) => ({ y, opacity: 1 }),
@@ -81,73 +85,53 @@ function App() {
   }
 
   const onDragStart = (draggedId, ev) => {
-    setCurrentDraggedId(draggedId);
-    console.log(ev);
+    setCurrentDraggedObject({id: draggedId, ev: ev});
   }
 
   const onDragOver = (id) => {
     const draggedOverItemParentListId = todoValues[id].state;
     const draggedOverItemIndex = list[draggedOverItemParentListId].findIndex(item => item.id == id);
 
-    const draggedItemParentListId = todoValues[currentDraggedId].state;
+    const draggedItemParentListId = todoValues[currentDraggedObject.id].state;
 
     // if the item is dragged over itself, ignore
-    if (currentDraggedId == id || draggedItemParentListId != draggedOverItemParentListId) {
+    if (currentDraggedObject.id == id || draggedItemParentListId != draggedOverItemParentListId) {
       return;
     } 
     // filter out the currently dragged item
-    let items = list[draggedOverItemParentListId].filter(item => item.id != currentDraggedId);
+    let items = list[draggedOverItemParentListId].filter(item => item.id != currentDraggedObject.id);
     // add the dragged item after the dragged over item
-    items.splice(draggedOverItemIndex, 0, {id: currentDraggedId});
+    items.splice(draggedOverItemIndex, 0, {id: currentDraggedObject.id});
     setLists(lists => ({
       ...lists,
       [draggedOverItemParentListId]: items
     }));
   };
 
-
   const onDroppableDragOver = useCallback((listId) => {
-    const currentDraggedItem = { ...todoValues[currentDraggedId] };
+    const currentDraggedItem = { ...todoValues[currentDraggedObject.id] };
     const previousState = currentDraggedItem.state; 
     // console.log(previousState == listId);
     if (previousState == listId) return;
 
     let previousList = list[currentDraggedItem.state];
-    const indexInList = previousList.findIndex(item => item.id == currentDraggedId);
+    const indexInList = previousList.findIndex(item => item.id == currentDraggedObject.id);
     if (indexInList > -1) {
       previousList.splice(indexInList, 1);
     }
     currentDraggedItem.state = listId;
     const currentList = list[currentDraggedItem.state];
-    currentList.push({id: currentDraggedId});
-    setValue({ ...todoValues, [currentDraggedId]: currentDraggedItem });
+    currentList.push({id: currentDraggedObject.id});
+    setValue({ ...todoValues, [currentDraggedObject.id]: currentDraggedItem });
     setLists({ ...list, [previousState]: previousList, [currentDraggedItem.state]: currentList} );
-  }, [todoValues, list, currentDraggedId])
+    window.requestAnimationFrame(() => { currentDraggedObject.ev.target.style.visibility = "hidden"; });
+  }, [todoValues, list, currentDraggedObject.id])
 
   const onDrop = () => {
+    window.requestAnimationFrame(() => { currentDraggedObject.ev.target.style.visibility = "visible"; });
     setValue({ ...todoValues});
-    setCurrentDraggedId(null);
+    setCurrentDraggedObject({id: null, ev: null});
   }
-  
-  const onSpringDragOver = (listId) => {
-    // console.log(list);
-    // console.log(todoValues);
-    const currentDraggedItem = { ...todoValues[currentDraggedId] };
-    const previousState = currentDraggedItem.state; 
-    // console.log(previousState == listId);
-    if (previousState == listId || currentDraggedId == null) return;
-
-    let previousList = list[currentDraggedItem.state];
-    const indexInList = previousList.indexOf(currentDraggedId);
-    if (indexInList > -1) {
-      previousList.splice(indexInList, 1);
-    }
-    currentDraggedItem.state = listId;
-    const currentList = list[currentDraggedItem.state];
-    currentList.push(currentDraggedId);
-    setValue({ ...todoValues, [currentDraggedId]: currentDraggedItem });
-    setLists({ ...list, [previousState]: previousList, [currentDraggedItem.state]: currentList} );
-  };
 
   return (
     <div className="App">
