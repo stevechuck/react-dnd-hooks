@@ -48,13 +48,15 @@ function renderDragItems(transition, todoValues, onDragStart, onDragOver) {
       key={key}
       style={{
         transform: y.interpolate(y => `translate3d(0,${y}px,0)`),
-        zIndex: transition.length - index,
+        width: "100%",
+        height: "100%",
         ...rest
       }}
     >
     <DragItem id={item.id} data={todoValues[item.id]} key={item.id} index={index} 
       onDragStart={onDragStart}
-      onDragOver={onDragOver}/>
+      onDragOver={onDragOver} 
+    />
     </animated.div>
   ))
 }
@@ -64,25 +66,23 @@ function App() {
   const [list, setLists] = useState(listData);
   const [currentDraggedObject, setCurrentDraggedObject] = useState({id: null, ev: null});
   
-  const height = 15;
+  let height = 0
   let transitions = {};
   for (let [listId, listVal] of Object.entries(list)) {
     const transition = useTransition(
-      listVal.map((data, i) => ({ ...data, y: i * height })),
+      listVal.map((data, i) => ({ ...data, y: (height += 3) - 3 })),
       d => d.id,
       {
-        // config: { mass: 1, tension: 120, friction: 14, initialVelocity: 100 },
-        config: {
-          duration: 1000,
-        },
         from: { opacity: 0 },
         leave: { height: 0, opacity: 0 },
         enter: ({ y }) => ({ y, opacity: 1 }),
-        update: ({ y }) => ({ y, opacity: 1 })
+        update: ({ y }) => ({ y })
       }
     );
     transitions[listId] = transition;
   }
+
+  console.log(transitions);
 
   const onDragStart = (draggedId, ev) => {
     setCurrentDraggedObject({id: draggedId, ev: ev});
@@ -136,13 +136,19 @@ function App() {
   return (
     <div className="App">
       <div className="box">
-        <DropItem heading="Todo" onDragOver={() => {onDroppableDragOver("todo")}} onDrop={onDrop}>
+        <DropItem heading="Todo" 
+          onDragOver={() => {onDroppableDragOver("todo")}} 
+          onDrop={onDrop}>
           { renderDragItems(transitions["todo"], todoValues, onDragStart, onDragOver) }
         </DropItem>
-        <DropItem heading="WIP" onDragOver={() => {onDroppableDragOver("wip")}} onDrop={onDrop}>
+        <DropItem heading="WIP" 
+          onDragOver={() => {onDroppableDragOver("wip")}} 
+          onDrop={onDrop}>
           { renderDragItems(transitions["wip"], todoValues, onDragStart, onDragOver) }
         </DropItem>
-        <DropItem heading="Done" onDragOver={() => {onDroppableDragOver("done")}} onDrop={onDrop}>
+        <DropItem heading="Done" 
+          onDragOver={() => {onDroppableDragOver("done")}} 
+          onDrop={onDrop}>
           { renderDragItems(transitions["done"], todoValues, onDragStart, onDragOver) }
         </DropItem>
       </div>

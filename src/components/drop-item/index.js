@@ -3,7 +3,7 @@ import View from "./view";
 
 import useDrop from "../../hooks/useDrop";
 
-export default ({ children, heading, onDrop, onDragOver }) => {
+export default ({ children, heading, onDrop, onDragOver, style }) => {
   const dropRef = useRef();
   const { dropState, droppedItem } = useDrop({
     ref: dropRef,
@@ -11,7 +11,7 @@ export default ({ children, heading, onDrop, onDragOver }) => {
     onDragOver: onDragOver
   });
   return (
-    <View ref={dropRef} heading={heading} droppedItem={droppedItem}>
+    <View ref={dropRef} heading={heading} droppedItem={droppedItem} style={style}>
       {children}
     </View>
   );
