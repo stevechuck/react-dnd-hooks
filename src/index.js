@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactDOM from "react-dom";
 import DragItem from "./components/drag-item";
 import DropItem from "./components/drop-item";
-import { TreeNode } from "./components/tree-node/TreeNode"
+import { TreeNode, LeafNode, ParentNode } from "./components/tree-node/TreeNode"
 import { Global } from './components/tree-node/styles'
 import { DraggableList } from './components/spring-draggable-list/DraggableList'
 import { MyDraggableList } from './components/my-draggable-list/MyDraggableList'
@@ -53,10 +53,30 @@ function renderDragItems(transition, todoValues, onDragStart, onDragOver) {
         ...rest
       }}
     >
-    <DragItem id={item.id} data={todoValues[item.id]} key={item.id} index={index} 
-      onDragStart={onDragStart}
-      onDragOver={onDragOver} 
-    />
+    <DragItem id={item.id} key={item.id} index={index}  onDragStart={onDragStart} onDragOver={onDragOver} >
+      <div className="item">{todoValues[item.id].text}</div>
+    </DragItem>
+    </animated.div>
+  ))
+}
+
+function renderLeafNodes(transition, todoValues, onDragStart, onDragOver) {
+  return transition.map(({ item, props: { y, ...rest }, key }, index) => (
+    <animated.div
+      key={key}
+      style={{
+        transform: y.interpolate(y => `translate3d(0,${y}px,0)`),
+        width: "100%",
+        height: "100%",
+        ...rest
+      }}
+    >
+    <LeafNode 
+      id={item.id} key={item.id} index={index}
+      data={todoValues[item.id].text} 
+      style={{ color: '#37ceff' }}  
+      onDragStart={onDragStart} 
+      onDragOver={onDragOver} />
     </animated.div>
   ))
 }
@@ -82,7 +102,6 @@ function App() {
     transitions[listId] = transition;
   }
 
-  console.log(transitions);
 
   const onDragStart = (draggedId, ev) => {
     setCurrentDraggedObject({id: draggedId, ev: ev});
@@ -111,7 +130,6 @@ function App() {
   const onDroppableDragOver = useCallback((listId) => {
     const currentDraggedItem = { ...todoValues[currentDraggedObject.id] };
     const previousState = currentDraggedItem.state; 
-    // console.log(previousState == listId);
     if (previousState == listId) return;
 
     let previousList = list[currentDraggedItem.state];
@@ -137,17 +155,23 @@ function App() {
     <div className="App">
       <div className="box">
         <DropItem heading="Todo" 
-          onDragOver={() => {onDroppableDragOver("todo")}} 
+          className="container"
+          id="todo"
+          onDragOver={onDroppableDragOver} 
           onDrop={onDrop}>
           { renderDragItems(transitions["todo"], todoValues, onDragStart, onDragOver) }
         </DropItem>
         <DropItem heading="WIP" 
-          onDragOver={() => {onDroppableDragOver("wip")}} 
+          className="container"
+          id="wip"
+          onDragOver={onDroppableDragOver} 
           onDrop={onDrop}>
           { renderDragItems(transitions["wip"], todoValues, onDragStart, onDragOver) }
         </DropItem>
         <DropItem heading="Done" 
-          onDragOver={() => {onDroppableDragOver("done")}} 
+          className="container"
+          id="done"
+          onDragOver={onDroppableDragOver} 
           onDrop={onDrop}>
           { renderDragItems(transitions["done"], todoValues, onDragStart, onDragOver) }
         </DropItem>
@@ -173,6 +197,11 @@ function App() {
           <TreeNode name="world" />
           <TreeNode name={<span>🙀 something something</span>} />
         </TreeNode>
+        <ParentNode data="Todo" id="todo" onDroppableDragOver={onDroppableDragOver} onDrop={onDrop}>
+          {/* <LeafNode data="child1" style={{ color: '#37ceff' }} id="4" onDragStart={onDragStart} onDragOver={onDragOver} /> */}
+          { renderLeafNodes(transitions["todo"], todoValues, onDragStart, onDragOver) }
+        </ParentNode>
+        
       </div>      
       {/* <div style={{ "display": "flex", "justifyContent": "start", "marginTop":"2em"}}>
         <DraggableList listId="todo" items={springList.todo} onDragEnter={onSpringDragOver} setDragItem={onDragStateChanged}/>

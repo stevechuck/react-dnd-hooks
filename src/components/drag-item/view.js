@@ -1,10 +1,10 @@
 import React, { forwardRef } from "react";
 import "./styles.css";
 
-export default forwardRef(({ data, styles, classValue }, ref) => {
+export default forwardRef(({ children, styles, classValue }, ref) => {
   return (
-    <div className={`item ${classValue}`} style={styles} ref={ref}>
-      {data.text}
+    <div className={`${classValue}`} style={styles} ref={ref}>
+      {children}
     </div>
   );
 });

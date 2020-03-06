@@ -3,7 +3,7 @@ import "../../index.css";
 import useDrag from "../../hooks/useDrag";
 import View from "./view";
 
-export default ({ dragEffect, data, id, onDragStart, onDragOver }) => {
+export default ({ children, dragEffect, id, onDragStart, onDragOver }) => {
   const dragRef = useRef();
   const [classValue, setClassValue] = useState("grab");
   const { dragState } = useDrag({
@@ -26,5 +26,5 @@ export default ({ dragEffect, data, id, onDragStart, onDragOver }) => {
     transition: "transform 1s"
   }), [dragState]);
 
-  return <View ref={dragRef} data={data} styles={styles} classValue={classValue} />;
+  return <View children={children} ref={dragRef} styles={styles} classValue={classValue} />;
 };
